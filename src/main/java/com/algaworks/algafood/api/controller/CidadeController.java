@@ -5,6 +5,9 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,7 +32,6 @@ import com.algaworks.algafood.domain.model.Cidade;
 import com.algaworks.algafood.domain.repository.CidadeRepository;
 import com.algaworks.algafood.domain.service.CadastroCidadeService;
 
-
 @RestController
 @RequestMapping(path = "/cidades", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CidadeController implements CidadeControllerOpenApi {
@@ -46,16 +48,15 @@ public class CidadeController implements CidadeControllerOpenApi {
 	@Autowired
 	private CidadeInputDisassembler cidadeInputDisassembler;
 
-
 	@GetMapping
-	public List<CidadeModel> listar() {
+	public CollectionModel<CidadeModel> listar() {
 
 		List<Cidade> todasCidades = cidadeRepository.findAll();
 
 		return cidadeModelAssembler.toCollectionModel(todasCidades);
 	}
 
-
+	@SuppressWarnings("deprecation")
 	@GetMapping("/{cidadeId}")
 	public CidadeModel buscar(@PathVariable Long cidadeId) {
 
@@ -78,7 +79,6 @@ public class CidadeController implements CidadeControllerOpenApi {
 //		
 //	}
 
-
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public CidadeModel adicionar(@RequestBody @Valid CidadeInput cidadeInput) {
@@ -88,10 +88,10 @@ public class CidadeController implements CidadeControllerOpenApi {
 
 			cidade = cadastroCidadeService.salvar(cidade);
 
-			CidadeModel cidadeModel =  cidadeModelAssembler.toModel(cidade);
-			
+			CidadeModel cidadeModel = cidadeModelAssembler.toModel(cidade);
+
 			ResourceUriHelper.addUriInResponseHeader(cidadeModel.getId());
-			
+
 			return cidadeModel;
 		} catch (EstadoNaoEncontradaException e) {
 			throw new NegocioException(e.getMessage(), e);
@@ -118,10 +118,8 @@ public class CidadeController implements CidadeControllerOpenApi {
 //		}
 //	}
 
-
 	@PutMapping("/{cidadeId}")
-	public CidadeModel atualizar(@PathVariable Long cidadeId,
-			@RequestBody @Valid CidadeInput cidadeInput) {
+	public CidadeModel atualizar(@PathVariable Long cidadeId, @RequestBody @Valid CidadeInput cidadeInput) {
 
 		try {
 
@@ -136,7 +134,6 @@ public class CidadeController implements CidadeControllerOpenApi {
 			throw new NegocioException(e.getMessage(), e);
 		}
 	}
-
 
 	@DeleteMapping("/{cidadeId}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
